@@ -113,7 +113,7 @@ const createEmployeeSalary = async (event) => {
       }),
     };
     // Insert the item into DynamoDB
-    await db.send(new PutItemCommand(params));
+    await client.send(new PutItemCommand(params));
     response.body = JSON.stringify({
       message: "Successfully created salaryDetails!",
     });
