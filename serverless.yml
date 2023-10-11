@@ -1,0 +1,43 @@
+service: employee-slary-info-service
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: ap-south-1
+  environment:
+    DYNAMODB_TABLE_NAME: ${self:custom.employeeSalaryInfo}
+custom:
+  employeeSalaryInfo: employee-slary-info-table-${self:provider.stage}
+plugins:
+  - serverless-iam-roles-per-function
+functions:
+  createEmployeeSalary:
+    handler: api.createEmployeeSalary
+    name: create-new-employee-salary-info
+    memorySize: 128 # mb
+    timeout: 5 # seconds
+    events:
+      - http:
+          path: employee/salary
+          method: POST
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:PutItem"
+          - "dynamodb:GetItem"
+        Resource: !GetAtt SalaryInfoTable.Arn
+resources:
+  Resources:
+    SalaryInfoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.employeeSalaryInfo}
+        AttributeDefinitions:
+          - AttributeName: empId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: empId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
