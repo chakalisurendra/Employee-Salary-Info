@@ -8,7 +8,9 @@ const client = new DynamoDBClient(); // Create new instance of DynamoDBClient to
 
 // Define regular expressions for validation
 //validatins for amount
-const amount = /^\d*(\.\d{2})?$/;
+//const amount = /^\d*(\.\d{2})?$/;
+const amount = /^\d+(\.\d{2})?$/;
+
 const PANCardNumber = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 
