@@ -50,6 +50,28 @@ const createEmployeeSalary = async (event) => {
     const salaryDetails = body.salaryDetails;
     console.log(salaryDetails);
 
+    //Check for required fields in the body
+    const requiredSalaryDetails = [
+      "PANCard",
+      "BasicMonthly",
+      "DAMonthly",
+      "SpecialAllowanceMonthly",
+      "PFSharedMonthly",
+      "ESIShareMonthly",
+      "DeductionsMonthly",
+      "NetPayMonthly",
+      "BasicYearly",
+      "DAYearly",
+      "SpecialAllowanceYearly",
+      "PFSharedYearly",
+      "ESIShareYearly",
+      "DeductionsYearly",
+      "NetPayYearly",
+      //   "IsActive",
+      //   "CreatedDateTime",
+      //   "UpdatedDateTime",
+    ];
+
     //Iterate salary Details to check mandatory fields
     for (const field of requiredSalaryDetails) {
       if (!body.salaryDetails[field]) {
@@ -75,28 +97,6 @@ const createEmployeeSalary = async (event) => {
     salaryDetails.CreatedDateTime = new Date().toISOString();
     salaryDetails.UpdatedDateTime = new Date().toISOString();
     salaryDetails.IsActive = true;
-
-    //Check for required fields in the body
-    const requiredSalaryDetails = [
-      "PANCard",
-      "BasicMonthly",
-      "DAMonthly",
-      "SpecialAllowanceMonthly",
-      "PFSharedMonthly",
-      "ESIShareMonthly",
-      "DeductionsMonthly",
-      "NetPayMonthly",
-      "BasicYearly",
-      "DAYearly",
-      "SpecialAllowanceYearly",
-      "PFSharedYearly",
-      "ESIShareYearly",
-      "DeductionsYearly",
-      "NetPayYearly",
-      //   "IsActive",
-      //   "CreatedDateTime",
-      //   "UpdatedDateTime",
-    ];
 
     // Define parameters for inserting an item into DynamoDB
     const params = {
