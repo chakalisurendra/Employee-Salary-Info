@@ -41,6 +41,20 @@ functions:
           - "dynamodb:UpdateItem"
           - "dynamodb:GetItem"
         Resource: !GetAtt SalaryInfoTable.Arn
+  getEmployeeSalary:
+    handler: api.getEmployeeSalary
+    name: get-employee-salary-info
+    memorySize: 128 # mb
+    timeout: 5 # seconds
+    events:
+      - http:
+          path: employee/get/salary/{empId}
+          method: PUT
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:GetItem"
+        Resource: !GetAtt SalaryInfoTable.Arn
 resources:
   Resources:
     SalaryInfoTable:
