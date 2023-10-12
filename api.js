@@ -2,6 +2,7 @@
 const {
   DynamoDBClient, // Dynamodb instance
   PutItemCommand,
+  UpdateItemCommand,
 } = require("@aws-sdk/client-dynamodb"); //aws-sdk is used to build rest APIs
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb"); // Importing marshall, unmarshall for Convert a JavaScript object into a DynamoDB record and a DynamoDB record into a JavaScript object
 const client = new DynamoDBClient(); // Create new instance of DynamoDBClient to client, will use this constant across the program
@@ -145,6 +146,64 @@ const createEmployeeSalary = async (event) => {
   return response;
 };
 
+const updateEmployeeSalary = async (event) => {
+  let response = { statusCode: 200 };
+  try {
+    // Parse the JSON body from the event
+    const body = JSON.parse(event.body);
+    const objKeys = Object.keys(body);
+    // Perform validation on salaryDetails
+    const validationError = validation(salaryDetails);
+    if (validationError) {
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: validationError,
+      });
+      throw new Error(validationError);
+    }
+    salaryDetails.UpdatedDateTime = new Date().toISOString();
+    // Define parameters for updating an item in DynamoDB
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE_NAME,
+      Key: marshall({ empId: event.pathParameters.empId }),
+      //add the below line in params to validate and restrict the put method (updates only if the attribute exists)
+      UpdateExpression: `SET ${objKeys
+        .map((_, index) => `#key${index} = :value${index}`)
+        .join(", ")}`,
+      ExpressionAttributeNames: objKeys.reduce(
+        (acc, key, index) => ({
+          ...acc,
+          [`#key${index}`]: key,
+        }),
+        {}
+      ),
+      ExpressionAttributeValues: marshall(
+        objKeys.reduce(
+          (acc, key, index) => ({
+            ...acc,
+            [`:value${index}`]: body[key],
+          }),
+          {}
+        )
+      ),
+    };
+    // Update the item in DynamoDB
+    const updateResult = await client.send(new UpdateItemCommand(params));
+    response.body = JSON.stringify({
+      message: "Successfully updated salary.",
+      updateResult,
+    });
+  } catch (e) {
+    console.error(e);
+    response.body = JSON.stringify({
+      message: "Failed to update BankDetails!",
+      errorMsg: e.message,
+      errorStack: e.stack,
+    });
+  }
+  return response;
+};
 module.exports = {
   createEmployeeSalary,
+  updateEmployeeSalary,
 }; // exporting the function
