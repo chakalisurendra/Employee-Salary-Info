@@ -161,7 +161,7 @@ const updateEmployeeSalary = async (event) => {
       });
       throw new Error(validationError);
     }
-    salaryDetails.UpdatedDateTime = new Date().toISOString();
+    //salaryDetails.UpdatedDateTime = new Date().toISOString();
     // Define parameters for updating an item in DynamoDB
     const params = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
