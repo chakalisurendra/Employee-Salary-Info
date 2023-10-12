@@ -153,7 +153,7 @@ const updateEmployeeSalary = async (event) => {
     const body = JSON.parse(event.body);
     const objKeys = Object.keys(body);
     // Perform validation on salaryDetails
-    const validationError = validation(salaryDetails);
+    const validationError = validation(body.salaryDetails);
     if (validationError) {
       response.statusCode = 400;
       response.body = JSON.stringify({
