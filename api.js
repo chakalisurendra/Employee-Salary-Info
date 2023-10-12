@@ -151,6 +151,17 @@ const updateEmployeeSalary = async (event) => {
   try {
     // Parse the JSON body from the event
     const body = JSON.parse(event.body);
+    const empId = event.pathParameters.empId;
+
+    const existingEmployee = await getEmployeeByEmpId(empId);
+    if (!existingEmployee) {
+      response.statusCode = 404;
+      response.body = JSON.stringify({
+        message: `Employee with empId ${empId} not found.`,
+      });
+      return response;
+    }
+    
     const objKeys = Object.keys(body);
     // Perform validation on salaryDetails
     const validationError = validation(body.salaryDetails);
