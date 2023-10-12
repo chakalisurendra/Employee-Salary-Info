@@ -155,20 +155,11 @@ const updateEmployeeSalary = async (event) => {
     const empId = event.pathParameters.empId;
 
     const existingEmployee = await getEmployeeSalary(empId);
-    if (existingEmployee.message == "Failed to retrieved employee bank details.") {
-      response.statusCode = 404;
-      response.body = JSON.stringify({
-        message: `Employee with empId ${empId} not found.`,
-      });
-      return response;
-    }
 
-    if (existingEmployee.message == "Employee bank details not found.") {
+    // Check if the employee exists
+    if (!existingEmployee) {
       response.statusCode = 404;
-      response.body = JSON.stringify({
-        message: `Employee with empId ${empId} not found.`,
-      });
-      return response;
+      throw new Error("Employee not found");
     }
     
     const objKeys = Object.keys(body);
