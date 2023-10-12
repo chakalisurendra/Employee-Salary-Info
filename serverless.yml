@@ -49,7 +49,7 @@ functions:
     events:
       - http:
           path: employee/get/salary/{empId}
-          method: PUT
+          method: GET
     iamRoleStatements:
       - Effect: "Allow"
         Action:
