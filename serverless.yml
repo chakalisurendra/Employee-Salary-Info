@@ -33,7 +33,7 @@ functions:
     timeout: 5 # seconds
     events:
       - http:
-          path: employee/update/salary
+          path: employee/update/salary/{empId}
           method: PUT
     iamRoleStatements:
       - Effect: "Allow"
