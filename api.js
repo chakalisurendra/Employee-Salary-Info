@@ -147,7 +147,7 @@ const createEmployeeSalary = async (event) => {
   return response;
 };
 
-async function updateEmployeeSalary(event) {
+const updateEmployeeSalary = async (event) => {
   let response = { statusCode: 200 };
   try {
     //const employeeId = event.pathParameters.empId;
