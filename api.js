@@ -147,85 +147,153 @@ const createEmployeeSalary = async (event) => {
   return response;
 };
 
-const updateEmployeeSalary = async (event) => {
-  let response = { statusCode: 200 };
-  try {
-    //const employeeId = event.pathParameters.empId;
-    const requestBody = JSON.parse(event.body);
-    //const salaryDetails = body.salaryDetails;
-    console.log(requestBody);
-    const params = {
-      TableName: process.env.DYNAMODB_TABLE_NAME,
-      Key: {
-        empId: event.pathParameters.empId,
-      },
-      UpdateExpression:
-        "SET " +
-        "salaryDetails.PANCard= :pANCard, " +
-        "salaryDetails.BasicMonthly= :basicMonthly, " +
-        "salaryDetails.DAMonthly= :dAMonthly, " +
-        "salaryDetails.SpecialAllowanceMonthly= :specialAllowanceMonthly, " +
-        "salaryDetails.PFSharedMonthly= :pFSharedMonthly, " +
-        "salaryDetails.ESIShareMonthly= :eSIShareMonthly, " +
-        "salaryDetails.DeductionsMonthly= :deductionsMonthly, " +
-        "salaryDetails.NetPayMonthly= :netPayMonthly, " +
-        "salaryDetails.BasicYearly= :basicYearly, " +
-        "salaryDetails.DAYearly= :dAYearly, " +
-        "salaryDetails.SpecialAllowanceYearly= :specialAllowanceYearly, " +
-        "salaryDetails.PFSharedYearly= :pFSharedYearly, " +
-        "salaryDetails.ESIShareYearly= :eSIShareYearly, " +
-        "salaryDetails.DeductionsYearly= :deductionsYearly, " +
-        "salaryDetails.NetPayYearly= :netPayYearly, " +
-        "salaryDetails.IsActive= :isActive, " +
-        "salaryDetails.CreatedDateTime= :createdDateTime, " +
-        "salaryDetails.UpdatedDateTime= :updatedDateTime, ",
-      ExpressionAttributeValues: {
-        ":pANCard": requestBody.salaryDetails.PANCard,
-        ":basicMonthly": requestBody.salaryDetails.BasicMonthly,
-        ":dAMonthly": requestBody.salaryDetails.DAMonthly,
-        ":specialAllowanceMonthly":
-          requestBody.salaryDetails.SpecialAllowanceMonthly,
-        ":pFSharedMonthly": requestBody.salaryDetails.PFSharedMonthly,
-        ":eSIShareMonthly": requestBody.salaryDetails.ESIShareMonthly,
-        ":deductionsMonthly": requestBody.salaryDetails.DeductionsMonthly,
-        ":netPayMonthly": requestBody.salaryDetails.NetPayMonthly,
-        ":basicYearly": requestBody.salaryDetails.BasicYearly,
-        ":dAYearly": requestBody.salaryDetails.DAYearly,
-        ":specialAllowanceYearly":
-          requestBody.salaryDetails.SpecialAllowanceYearly,
-        ":pFSharedYearly": requestBody.salaryDetails.PFSharedYearly,
-        ":eSIShareYearly": requestBody.salaryDetails.ESIShareYearly,
-        ":deductionsYearly": requestBody.salaryDetails.DeductionsYearly,
-        ":netPayYearly": requestBody.salaryDetails.NetPayYearly,
-        ":isActive": requestBody.salaryDetails.IsActive,
-        ":createdDateTime": requestBody.salaryDetails.CreatedDateTime,
-        ":updatedDateTime": requestBody.salaryDetails.UpdatedDateTime,
-      },
-    };
-    //Update the item in DynamoDB
 
-    for (const field of requestBody.salaryDetails) {
-      if (!body.salaryDetails[field]) {
-        response.statusCode = 400;
-        throw new Error(`${field} is a mandatory field!`);
-      }
+
+const updateEmployeeSalary = async (event) => {
+  const response = { statusCode: 200 };
+  try {
+    const body = JSON.parse(event.body);
+    const empId = event.pathParameters ? event.pathParameters.empId : null;
+
+    if (!empId) {
+      throw new Error('empId not present');
     }
 
+    // Check if the empId exists in the database
+    const getItemParams = {
+      TableName: process.env.DYNAMODB_TABLE_NAME,
+      Key: marshall({ empId }),
+    };
+
+    const { Item } = await client.send(new GetItemCommand(getItemParams));
+
+    if (!Item) {
+      response.statusCode = 404; // Employee Id not found
+      response.body = JSON.stringify({
+        message: `Employee with empId ${empId} not found`,
+      });
+      return response;
+    }
+
+    const objKeys = Object.keys(body);
+
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE_NAME,
+      Key: marshall({ empId }),
+      UpdateExpression: `SET ${objKeys
+        .map((_, index) => `#key${index} = :value${index}`)
+        .join(', ')}`,
+      ExpressionAttributeNames: objKeys.reduce(
+        (acc, key, index) => ({
+          ...acc,
+          [`#key${index}`]: key,
+        }),
+        {}
+      ),
+      ExpressionAttributeValues: marshall(
+        objKeys.reduce(
+          (acc, key, index) => ({
+            ...acc,
+            [`:value${index}`]: body[key],
+          }),
+          {}
+        )
+      ),
+    };
     const updateResult = await client.send(new UpdateItemCommand(params));
     response.body = JSON.stringify({
-      message: "Successfully updated salary.",
+      message: 'Successfully updated employee.',
       updateResult,
     });
   } catch (e) {
     console.error(e);
+    response.statusCode = 400;
     response.body = JSON.stringify({
-      message: "Failed to update salary details!",
+      message: 'Failed to update employee.',
       errorMsg: e.message,
       errorStack: e.stack,
     });
   }
   return response;
 };
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//based on the fileds
+
+// const updateEmployeeSalary = async (event) => {
+//   let response = { statusCode: 200 };
+//   try {
+//     //const employeeId = event.pathParameters.empId;
+//     const requestBody = JSON.parse(event.body);
+//     //const salaryDetails = body.salaryDetails;
+//     console.log(requestBody);
+//     const params = {
+//       TableName: process.env.DYNAMODB_TABLE_NAME,
+//       Key: {
+//         empId: event.pathParameters.empId,
+//       },
+//       UpdateExpression:
+//         "SET " +
+//         "salaryDetails.PANCard= :pANCard, " +
+//         "salaryDetails.BasicMonthly= :basicMonthly, " +
+//         "salaryDetails.DAMonthly= :dAMonthly, " +
+//         "salaryDetails.SpecialAllowanceMonthly= :specialAllowanceMonthly, " +
+//         "salaryDetails.PFSharedMonthly= :pFSharedMonthly, " +
+//         "salaryDetails.ESIShareMonthly= :eSIShareMonthly, " +
+//         "salaryDetails.DeductionsMonthly= :deductionsMonthly, " +
+//         "salaryDetails.NetPayMonthly= :netPayMonthly, " +
+//         "salaryDetails.BasicYearly= :basicYearly, " +
+//         "salaryDetails.DAYearly= :dAYearly, " +
+//         "salaryDetails.SpecialAllowanceYearly= :specialAllowanceYearly, " +
+//         "salaryDetails.PFSharedYearly= :pFSharedYearly, " +
+//         "salaryDetails.ESIShareYearly= :eSIShareYearly, " +
+//         "salaryDetails.DeductionsYearly= :deductionsYearly, " +
+//         "salaryDetails.NetPayYearly= :netPayYearly, " +
+//         "salaryDetails.IsActive= :isActive, " +
+//         "salaryDetails.CreatedDateTime= :createdDateTime, " +
+//         "salaryDetails.UpdatedDateTime= :updatedDateTime, ",
+//       ExpressionAttributeValues: {
+//         ":pANCard": requestBody.salaryDetails.PANCard,
+//         ":basicMonthly": requestBody.salaryDetails.BasicMonthly,
+//         ":dAMonthly": requestBody.salaryDetails.DAMonthly,
+//         ":specialAllowanceMonthly":
+//           requestBody.salaryDetails.SpecialAllowanceMonthly,
+//         ":pFSharedMonthly": requestBody.salaryDetails.PFSharedMonthly,
+//         ":eSIShareMonthly": requestBody.salaryDetails.ESIShareMonthly,
+//         ":deductionsMonthly": requestBody.salaryDetails.DeductionsMonthly,
+//         ":netPayMonthly": requestBody.salaryDetails.NetPayMonthly,
+//         ":basicYearly": requestBody.salaryDetails.BasicYearly,
+//         ":dAYearly": requestBody.salaryDetails.DAYearly,
+//         ":specialAllowanceYearly":
+//           requestBody.salaryDetails.SpecialAllowanceYearly,
+//         ":pFSharedYearly": requestBody.salaryDetails.PFSharedYearly,
+//         ":eSIShareYearly": requestBody.salaryDetails.ESIShareYearly,
+//         ":deductionsYearly": requestBody.salaryDetails.DeductionsYearly,
+//         ":netPayYearly": requestBody.salaryDetails.NetPayYearly,
+//         ":isActive": requestBody.salaryDetails.IsActive,
+//         ":createdDateTime": requestBody.salaryDetails.CreatedDateTime,
+//         ":updatedDateTime": requestBody.salaryDetails.UpdatedDateTime,
+//       },
+//     };
+//     //Update the item in DynamoDB
+//     const updateResult = await client.send(new UpdateItemCommand(params));
+//     response.body = JSON.stringify({
+//       message: "Successfully updated salary.",
+//       updateResult,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     response.body = JSON.stringify({
+//       message: "Failed to update salary details!",
+//       errorMsg: e.message,
+//       errorStack: e.stack,
+//     });
+//   }
+//   return response;
+// };
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // const updateEmployeeSalary = async (event) => {
 //   let response = { statusCode: 200 };
