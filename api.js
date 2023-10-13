@@ -152,6 +152,7 @@ const updateEmployeeSalary = async (event) => {
   try {
     //const employeeId = event.pathParameters.empId;
     const requestBody = JSON.parse(event.body);
+    const salaryDetails = body.salaryDetails;
     console.log(requestBody);
     const params = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
@@ -160,23 +161,23 @@ const updateEmployeeSalary = async (event) => {
       },
       UpdateExpression:
         "SET " +
-        "salaryDetails.PANCard= :pANCard " +
-        "salaryDetails.BasicMonthly= :basicMonthly " +
-        "salaryDetails.DAMonthly= :dAMonthly " +
-        "salaryDetails.SpecialAllowanceMonthly= :specialAllowanceMonthly " +
-        "salaryDetails.PFSharedMonthly= :pFSharedMonthly " +
-        "salaryDetails.ESIShareMonthly= :eSIShareMonthly " +
-        "salaryDetails.DeductionsMonthly= :deductionsMonthly " +
-        "salaryDetails.NetPayMonthly= :netPayMonthly " +
-        "salaryDetails.BasicYearly= :basicYearly " +
-        "salaryDetails.DAYearly= :dAYearly " +
-        "salaryDetails.SpecialAllowanceYearly= :specialAllowanceYearly " +
-        "salaryDetails.PFSharedYearly= :pFSharedYearly " +
-        "salaryDetails.ESIShareYearly= :eSIShareYearly " +
-        "salaryDetails.DeductionsYearly= :deductionsYearly " +
+        "salaryDetails.PANCard= :pANCard, " +
+        "salaryDetails.BasicMonthly= :basicMonthly, " +
+        "salaryDetails.DAMonthly= :dAMonthly, " +
+        "salaryDetails.SpecialAllowanceMonthly= :specialAllowanceMonthly, " +
+        "salaryDetails.PFSharedMonthly= :pFSharedMonthly, " +
+        "salaryDetails.ESIShareMonthly= :eSIShareMonthly, " +
+        "salaryDetails.DeductionsMonthly= :deductionsMonthly, " +
+        "salaryDetails.NetPayMonthly= :netPayMonthly, " +
+        "salaryDetails.BasicYearly= :basicYearly, " +
+        "salaryDetails.DAYearly= :dAYearly, " +
+        "salaryDetails.SpecialAllowanceYearly= :specialAllowanceYearly, " +
+        "salaryDetails.PFSharedYearly= :pFSharedYearly, " +
+        "salaryDetails.ESIShareYearly= :eSIShareYearly, " +
+        "salaryDetails.DeductionsYearly= :deductionsYearly, " +
         "salaryDetails.NetPayYearly= :netPayYearly " +
-        "salaryDetails.IsActive= :isActive " +
-        "salaryDetails.CreatedDateTime= :createdDateTime " +
+        "salaryDetails.IsActive= :isActive, " +
+        "salaryDetails.CreatedDateTime= :createdDateTime, " +
         "salaryDetails.UpdatedDateTime= :updatedDateTime ",
       ExpressionAttributeValues: {
         ":pANCard": requestBody.salaryDetails.PANCard,
@@ -216,7 +217,7 @@ const updateEmployeeSalary = async (event) => {
     });
   }
   return response;
-}
+};
 
 // const updateEmployeeSalary = async (event) => {
 //   let response = { statusCode: 200 };
