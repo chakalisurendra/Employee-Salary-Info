@@ -147,58 +147,60 @@ const createEmployeeSalary = async (event) => {
   return response;
 };
 
-const updateEmployeeSalary = async (event) => {
-  let response = { statusCode: 200 };
+async function updateEmployeeSalary(event) {
   try {
-    // Parse the JSON body from the event
-    const body = JSON.parse(event.body);
-    const empId = event.pathParameters.empId;
-
-    const existingEmployee = await getEmployeeSalary(empId);
-
-    // Check if the employee exists
-    if (!existingEmployee) {
-      response.statusCode = 404;
-      throw new Error("Employee not found");
-    }
-    
-    const objKeys = Object.keys(body);
-    // Perform validation on salaryDetails
-    const validationError = validation(body.salaryDetails);
-    if (validationError) {
-      response.statusCode = 400;
-      response.body = JSON.stringify({
-        message: validationError,
-      });
-      throw new Error(validationError);
-    }
-    //salaryDetails.UpdatedDateTime = new Date().toISOString();
-    // Define parameters for updating an item in DynamoDB
+    //const employeeId = event.pathParameters.empId;
+    const requestBody = JSON.parse(event.body);
+    console.log(requestBody);
     const params = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
-      Key: marshall({ empId: event.pathParameters.empId }),
-      //add the below line in params to validate and restrict the put method (updates only if the attribute exists)
-      UpdateExpression: `SET ${objKeys
-        .map((_, index) => `#key${index} = :value${index}`)
-        .join(", ")}`,
-      ExpressionAttributeNames: objKeys.reduce(
-        (acc, key, index) => ({
-          ...acc,
-          [`#key${index}`]: key,
-        }),
-        {}
-      ),
-      ExpressionAttributeValues: marshall(
-        objKeys.reduce(
-          (acc, key, index) => ({
-            ...acc,
-            [`:value${index}`]: body[key],
-          }),
-          {}
-        )
-      ),
+      Key: {
+        empId: event.pathParameters.empId,
+      },
+      UpdateExpression:
+        "SET " +
+        "salaryDetails.PANCard= :pANCard " +
+        "salaryDetails.BasicMonthly= :basicMonthly " +
+        "salaryDetails.DAMonthly= :dAMonthly " +
+        "salaryDetails.SpecialAllowanceMonthly= :specialAllowanceMonthly " +
+        "salaryDetails.PFSharedMonthly= :pFSharedMonthly " +
+        "salaryDetails.ESIShareMonthly= :eSIShareMonthly " +
+        "salaryDetails.DeductionsMonthly= :deductionsMonthly " +
+        "salaryDetails.NetPayMonthly= :netPayMonthly " +
+        "salaryDetails.BasicYearly= :basicYearly " +
+        "salaryDetails.DAYearly= :dAYearly " +
+        "salaryDetails.SpecialAllowanceYearly= :specialAllowanceYearly " +
+        "salaryDetails.PFSharedYearly= :pFSharedYearly " +
+        "salaryDetails.ESIShareYearly= :eSIShareYearly " +
+        "salaryDetails.DeductionsYearly= :deductionsYearly " +
+        "salaryDetails.NetPayYearly= :netPayYearly " +
+        "salaryDetails.IsActive= :isActive " +
+        "salaryDetails.CreatedDateTime= :createdDateTime " +
+        "salaryDetails.UpdatedDateTime= :updatedDateTime ",
+      ExpressionAttributeValues: {
+        ":pANCard": requestBody.salaryDetails.PANCard,
+        ":basicMonthly": requestBody.salaryDetails.BasicMonthly,
+        ":dAMonthly": requestBody.salaryDetails.DAMonthly,
+        ":specialAllowanceMonthly":
+          requestBody.salaryDetails.SpecialAllowanceMonthly,
+        ":pFSharedMonthly": requestBody.salaryDetails.PFSharedMonthly,
+        ":eSIShareMonthly": requestBody.salaryDetails.ESIShareMonthly,
+        ":deductionsMonthly": requestBody.salaryDetails.DeductionsMonthly,
+        ":netPayMonthly": requestBody.salaryDetails.NetPayMonthly,
+        ":basicYearly": requestBody.salaryDetails.BasicYearly,
+        ":dAYearly": requestBody.salaryDetails.DAYearly,
+        ":specialAllowanceYearly":
+          requestBody.salaryDetails.SpecialAllowanceYearly,
+        ":pFSharedYearly": requestBody.salaryDetails.PFSharedYearly,
+        ":eSIShareYearly": requestBody.salaryDetails.ESIShareYearly,
+        ":deductionsYearly": requestBody.salaryDetails.DeductionsYearly,
+        ":netPayYearly": requestBody.salaryDetails.NetPayYearly,
+        ":isActive": requestBody.salaryDetails.IsActive,
+        ":createdDateTime": requestBody.salaryDetails.CreatedDateTime,
+        ":updatedDateTime": requestBody.salaryDetails.UpdatedDateTime,
+      },
     };
-    // Update the item in DynamoDB
+    //Update the item in DynamoDB
     const updateResult = await client.send(new UpdateItemCommand(params));
     response.body = JSON.stringify({
       message: "Successfully updated salary.",
@@ -213,43 +215,104 @@ const updateEmployeeSalary = async (event) => {
     });
   }
   return response;
-};
+}
+
+
+// const updateEmployeeSalary = async (event) => {
+//   let response = { statusCode: 200 };
+//   try {
+//     // Parse the JSON body from the event
+//     const body = JSON.parse(event.body);
+//     const empId = event.pathParameters.empId;
+
+//     const objKeys = Object.keys(body);
+//     // Perform validation on salaryDetails
+//     const validationError = validation(body.salaryDetails);
+//     if (validationError) {
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         message: validationError,
+//       });
+//       throw new Error(validationError);
+//     }
+//     //salaryDetails.UpdatedDateTime = new Date().toISOString();
+//     // Define parameters for updating an item in DynamoDB
+//     const params = {
+//       TableName: process.env.DYNAMODB_TABLE_NAME,
+//       Key: marshall({ empId: event.pathParameters.empId }),
+//       //add the below line in params to validate and restrict the put method (updates only if the attribute exists)
+//       UpdateExpression: `SET ${objKeys
+//         .map((_, index) => `#key${index} = :value${index}`)
+//         .join(", ")}`,
+//       ExpressionAttributeNames: objKeys.reduce(
+//         (acc, key, index) => ({
+//           ...acc,
+//           [`#key${index}`]: key,
+//         }),
+//         {}
+//       ),
+//       ExpressionAttributeValues: marshall(
+//         objKeys.reduce(
+//           (acc, key, index) => ({
+//             ...acc,
+//             [`:value${index}`]: body[key],
+//           }),
+//           {}
+//         )
+//       ),
+//     };
+//     // Update the item in DynamoDB
+//     const updateResult = await client.send(new UpdateItemCommand(params));
+//     response.body = JSON.stringify({
+//       message: "Successfully updated salary.",
+//       updateResult,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     response.body = JSON.stringify({
+//       message: "Failed to update BankDetails!",
+//       errorMsg: e.message,
+//       errorStack: e.stack,
+//     });
+//   }
+//   return response;
+// };
 
 const getEmployeeSalary = async (event) => {
   let response = { statusCode: 200 };
-  try{
-const params = {
-  TableName: process.env.DYNAMODB_TABLE_NAME, // Getting table name from the servetless.yml and setting to the TableName
-  Key: marshall({ empId: event.pathParameters.empId }), // Convert a JavaScript object into a DynamoDB record.
+  try {
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE_NAME, // Getting table name from the servetless.yml and setting to the TableName
+      Key: marshall({ empId: event.pathParameters.empId }), // Convert a JavaScript object into a DynamoDB record.
+    };
+    //await response from db when sent getItem command with params
+    //containing tablename, key and only display empId and bank details
+    const { Item } = await client.send(new GetItemCommand(params)); //An asynchronous call to DynamoDB to retrieve an item
+    console.log({ Item });
+    if (!Item) {
+      // If there is no employee bank details found
+      response.statusCode = 404; // Setting the status code to 404
+      response.body = JSON.stringify({
+        message: "Employee bank details not found.",
+      }); // Setting error message
+    } else {
+      // If employee bank details found in the dynamoDB set to data
+      response.body = JSON.stringify({
+        message: "Successfully retrieved Employee bank details.",
+        data: unmarshall(Item), // A DynamoDB record into a JavaScript object and setting to the data
+      });
+    }
+  } catch (e) {
+    // If any errors will occurred
+    console.error(e);
+    response.body = JSON.stringify({
+      statusCode: e.statusCode, // Set server side status code
+      message: "Failed to retrieved employee bank details.",
+      errorMsg: e.message, // Set error message
+    });
+  }
+  return response;
 };
-//await response from db when sent getItem command with params
-//containing tablename, key and only display empId and bank details
-const { Item } = await client.send(new GetItemCommand(params)); //An asynchronous call to DynamoDB to retrieve an item
-console.log({ Item });
-if (!Item) {
-  // If there is no employee bank details found
-  response.statusCode = 404; // Setting the status code to 404
-  response.body = JSON.stringify({
-    message: "Employee bank details not found.",
-  }); // Setting error message
-} else {
-  // If employee bank details found in the dynamoDB set to data
-  response.body = JSON.stringify({
-    message: "Successfully retrieved Employee bank details.",
-    data: unmarshall(Item), // A DynamoDB record into a JavaScript object and setting to the data
-  });
-}
-} catch (e) {
-// If any errors will occurred
-console.error(e);
-response.body = JSON.stringify({
-  statusCode: e.statusCode, // Set server side status code
-  message: "Failed to retrieved employee bank details.",
-  errorMsg: e.message, // Set error message
-});
-}
-return response;
-}
 module.exports = {
   getEmployeeSalary,
   createEmployeeSalary,
