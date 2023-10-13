@@ -204,7 +204,7 @@ const updateEmployeeSalary = async (event) => {
     };
     //Update the item in DynamoDB
 
-    for (const field of ExpressionAttributeValues) {
+    for (const field of requestBody.salaryDetails) {
       if (!body.salaryDetails[field]) {
         response.statusCode = 400;
         throw new Error(`${field} is a mandatory field!`);
