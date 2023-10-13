@@ -152,7 +152,7 @@ const updateEmployeeSalary = async (event) => {
   try {
     //const employeeId = event.pathParameters.empId;
     const requestBody = JSON.parse(event.body);
-    const salaryDetails = body.salaryDetails;
+    //const salaryDetails = body.salaryDetails;
     console.log(requestBody);
     const params = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
