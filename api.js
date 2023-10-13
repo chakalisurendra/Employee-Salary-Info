@@ -148,6 +148,7 @@ const createEmployeeSalary = async (event) => {
 };
 
 async function updateEmployeeSalary(event) {
+  let response = { statusCode: 200 };
   try {
     //const employeeId = event.pathParameters.empId;
     const requestBody = JSON.parse(event.body);
@@ -216,7 +217,6 @@ async function updateEmployeeSalary(event) {
   }
   return response;
 }
-
 
 // const updateEmployeeSalary = async (event) => {
 //   let response = { statusCode: 200 };
