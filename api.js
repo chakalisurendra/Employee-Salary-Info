@@ -175,10 +175,10 @@ const updateEmployeeSalary = async (event) => {
         "salaryDetails.PFSharedYearly= :pFSharedYearly, " +
         "salaryDetails.ESIShareYearly= :eSIShareYearly, " +
         "salaryDetails.DeductionsYearly= :deductionsYearly, " +
-        "salaryDetails.NetPayYearly= :netPayYearly " +
+        "salaryDetails.NetPayYearly= :netPayYearly, " +
         "salaryDetails.IsActive= :isActive, " +
         "salaryDetails.CreatedDateTime= :createdDateTime, " +
-        "salaryDetails.UpdatedDateTime= :updatedDateTime ",
+        "salaryDetails.UpdatedDateTime= :updatedDateTime, ",
       ExpressionAttributeValues: {
         ":pANCard": requestBody.salaryDetails.PANCard,
         ":basicMonthly": requestBody.salaryDetails.BasicMonthly,
@@ -211,7 +211,7 @@ const updateEmployeeSalary = async (event) => {
   } catch (e) {
     console.error(e);
     response.body = JSON.stringify({
-      message: "Failed to update BankDetails!",
+      message: "Failed to update salary details!",
       errorMsg: e.message,
       errorStack: e.stack,
     });
